@@ -101,6 +101,8 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Seed data for InMemory database (data is not persisted across restarts)
+// Seed default admin user for InMemory database (development only).
+// Provide the seed password via the EMS_SEED_ADMIN_PASSWORD environment variable.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -128,6 +130,28 @@ using (var scope = app.Services.CreateScope())
             CreatedAt = DateTime.UtcNow
         });
         db.SaveChanges();
+
+    if (app.Environment.IsDevelopment() && db.Database.IsInMemory())
+    {
+        db.Database.EnsureCreated();
+
+        var seedPassword = Environment.GetEnvironmentVariable("EMS_SEED_ADMIN_PASSWORD");
+        if (string.IsNullOrWhiteSpace(seedPassword))
+        {
+            app.Logger.LogWarning("Skipping admin user seeding because EMS_SEED_ADMIN_PASSWORD is not set.");
+        }
+        else if (!db.Users.Any(u => u.Username == "admin"))
+        {
+            db.Users.Add(new EmployeeManagementApi.Models.User
+            {
+                Username = "admin",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(seedPassword),
+                Email = "admin@ems.com",
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            });
+            db.SaveChanges();
+        }
     }
 }
 

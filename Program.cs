@@ -100,6 +100,25 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Seed default admin user for InMemory database
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.EnsureCreated();
+    if (!db.Users.Any())
+    {
+        db.Users.Add(new EmployeeManagementApi.Models.User
+        {
+            Username = "admin",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            Email = "admin@ems.com",
+            Role = "Admin",
+            CreatedAt = DateTime.UtcNow
+        });
+        db.SaveChanges();
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

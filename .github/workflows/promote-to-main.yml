@@ -1,0 +1,36 @@
+name: Promote to Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Confirm promotion of develop to main'
+        required: true
+        default: 'yes'
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'yes'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Create Pull Request to Main
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: develop
+        base: main
+        title: 'Release: Merge develop into main'
+        body: |
+          ## Release PR
+          This PR promotes all verified changes from `develop` to `main`.
+          
+          ### Checklist
+          - [ ] All CI checks passed on develop
+          - [ ] Code reviewed and approved
+          - [ ] Ready for production deployment
+        labels: release, promotion

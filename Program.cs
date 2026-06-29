@@ -117,7 +117,7 @@ using (var scope = app.Services.CreateScope())
         db.SaveChanges();
     }
 
-    if (!db.Users.Any())
+    if (!db.Users.Any(u => u.Username == "admin"))
     {
         db.Users.Add(new EmployeeManagementApi.Models.User
         {

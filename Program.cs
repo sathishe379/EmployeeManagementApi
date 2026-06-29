@@ -100,11 +100,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Seed default admin user for InMemory database
+// Seed data for InMemory database (data is not persisted across restarts)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+
+    if (!db.Departments.Any())
+    {
+        db.Departments.AddRange(
+            new EmployeeManagementApi.Models.Department { Name = "Engineering", Description = "Software development and engineering" },
+            new EmployeeManagementApi.Models.Department { Name = "Human Resources", Description = "HR and people operations" },
+            new EmployeeManagementApi.Models.Department { Name = "Finance", Description = "Financial planning and accounting" },
+            new EmployeeManagementApi.Models.Department { Name = "Marketing", Description = "Marketing and communications" }
+        );
+        db.SaveChanges();
+    }
+
     if (!db.Users.Any())
     {
         db.Users.Add(new EmployeeManagementApi.Models.User

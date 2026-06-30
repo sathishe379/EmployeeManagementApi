@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - develop
+      - Development
  
 permissions:
   pull-requests: write
@@ -36,4 +36,3 @@ jobs:
           AOAI_ENDPOINT: ${{ secrets.AOAI_ENDPOINT }}
           AOAI_API_KEY: ${{ secrets.AOAI_API_KEY }}
           AOAI_DEPLOYMENT: ${{ secrets.AOAI_DEPLOYMENT }}
-        run: python .github/scripts/pr_review.py

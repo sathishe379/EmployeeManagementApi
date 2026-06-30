@@ -119,10 +119,12 @@ using (var scope = app.Services.CreateScope())
 
     if (!db.Users.Any())
     {
+        var adminPassword = Environment.GetEnvironmentVariable("ADMIN_SEED_PASSWORD") ?? throw new InvalidOperationException(
+            "ADMIN_SEED_PASSWORD environment variable must be set for initial admin user seeding.");
         db.Users.Add(new EmployeeManagementApi.Models.User
         {
             Username = "admin",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
             Email = "admin@ems.com",
             Role = "Admin",
             CreatedAt = DateTime.UtcNow
